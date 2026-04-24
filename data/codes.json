@@ -1,0 +1,110 @@
+[
+  {
+    "code": "LOVEMONGIL",
+    "reward": "아티팩트: 넘쳐흐르는 사랑",
+    "addedAt": "2026-04-24",
+    "issuedAt": null,
+    "expiresAt": null,
+    "status": "active",
+    "source": "official"
+  },
+  {
+    "code": "MONGILDISCORD",
+    "reward": "별빛 수정 ×30, 은은한 별빛 가루 ×3, 골드 ×300,000",
+    "addedAt": "2026-04-24",
+    "issuedAt": null,
+    "expiresAt": null,
+    "status": "active",
+    "source": "official"
+  },
+  {
+    "code": "devlive0410",
+    "reward": "몬스터링 3종 (스카, 하얀늑대, 슬라릿)",
+    "addedAt": "2026-04-24",
+    "issuedAt": null,
+    "expiresAt": null,
+    "status": "active",
+    "source": "official"
+  },
+  {
+    "code": "DINDINISDINDIN",
+    "reward": "몬스터링 1종 (쵸파), 골드 ×10,000",
+    "addedAt": "2026-04-24",
+    "issuedAt": null,
+    "expiresAt": null,
+    "status": "active",
+    "source": "official"
+  },
+  {
+    "code": "MONGILPRESENT",
+    "reward": "몬스터링 3종 (쵸푸, 포크머거, 슬라릿)",
+    "addedAt": "2026-04-24",
+    "issuedAt": null,
+    "expiresAt": null,
+    "status": "active",
+    "source": "official"
+  },
+  {
+    "code": "MONGILREPORT",
+    "reward": "몬스터링 1종 (하얀 늑대)",
+    "addedAt": "2026-04-24",
+    "issuedAt": null,
+    "expiresAt": null,
+    "status": "active",
+    "source": "official"
+  },
+  {
+    "code": "GSBGMONGIL",
+    "reward": "몬스터링 1종 (쵸푸엉클), 골드 ×10,000",
+    "addedAt": "2026-04-24",
+    "issuedAt": null,
+    "expiresAt": null,
+    "status": "active",
+    "source": "official"
+  },
+  {
+    "code": "LETS",
+    "reward": "몬스터링 1종 (고블린 훈련병)",
+    "addedAt": "2026-04-24",
+    "issuedAt": null,
+    "expiresAt": null,
+    "status": "active",
+    "source": "official"
+  },
+  {
+    "code": "PLAY",
+    "reward": "몬스터링 1종 (왕소라뇽)",
+    "addedAt": "2026-04-24",
+    "issuedAt": null,
+    "expiresAt": null,
+    "status": "active",
+    "source": "official"
+  },
+  {
+    "code": "PLAYMONGIL",
+    "reward": "몬스터링 1종 (슬라링)",
+    "addedAt": "2026-04-24",
+    "issuedAt": null,
+    "expiresAt": null,
+    "status": "active",
+    "source": "official"
+  },
+  {
+    "code": "JOINMONGIL",
+    "reward": "몬스터링 1종 (도라뿅)",
+    "addedAt": "2026-04-24",
+    "issuedAt": null,
+    "expiresAt": null,
+    "status": "active",
+    "source": "official"
+  },
+  {
+    "code": "MEMOLMONGIL",
+    "reward": "미확인",
+    "addedAt": "2026-04-24",
+    "issuedAt": null,
+    "expiresAt": null,
+    "status": "active",
+    "source": "official"
+  }
+]
