@@ -2,54 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyAdminToken, AUTH_COOKIE } from "@/lib/auth";
 import { kv } from "@/lib/kv";
 import type { SuggestionRecord, Code } from "@/lib/schemas";
-
-const GITHUB_API = "https://api.github.com";
-
-async function getCodesFile() {
-  const owner = process.env.GITHUB_OWNER!;
-  const repo = process.env.GITHUB_REPO!;
-  const token = process.env.GITHUB_TOKEN!;
-
-  const res = await fetch(
-    `${GITHUB_API}/repos/${owner}/${repo}/contents/data/codes.json`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/vnd.github+json",
-      },
-    }
-  );
-  if (!res.ok) throw new Error("codes.json 파일을 가져오지 못했습니다.");
-  const data = (await res.json()) as { content: string; sha: string };
-  const codes = JSON.parse(
-    Buffer.from(data.content, "base64").toString("utf-8")
-  ) as Code[];
-  return { codes, sha: data.sha };
-}
-
-async function updateCodesFile(codes: Code[], sha: string, message: string) {
-  const owner = process.env.GITHUB_OWNER!;
-  const repo = process.env.GITHUB_REPO!;
-  const token = process.env.GITHUB_TOKEN!;
-
-  const content = Buffer.from(
-    JSON.stringify(codes, null, 2) + "\n"
-  ).toString("base64");
-
-  const res = await fetch(
-    `${GITHUB_API}/repos/${owner}/${repo}/contents/data/codes.json`,
-    {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/vnd.github+json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ message, content, sha }),
-    }
-  );
-  if (!res.ok) throw new Error("codes.json 업데이트에 실패했습니다.");
-}
+import staticCodes from "@/data/codes.json";
 
 export async function POST(req: NextRequest) {
   const token = req.cookies.get(AUTH_COOKIE)?.value ?? "";
@@ -81,8 +34,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { codes, sha } = await getCodesFile();
-    const alreadyExists = codes.some(
+    const community = (await kv.get<Code[]>("community_codes")) ?? [];
+    const allCodes = [...(staticCodes as Code[]), ...community];
+    const alreadyExists = allCodes.some(
       (c) => c.code.toUpperCase() === record.code.toUpperCase()
     );
     if (!alreadyExists) {
@@ -95,22 +49,15 @@ export async function POST(req: NextRequest) {
         status: "active",
         source: "community",
       };
-      codes.push(newCode);
-      await updateCodesFile(
-        codes,
-        sha,
-        `feat: 커뮤니티 제안 코드 "${record.code}" 추가 (${record.voteCount}표)`
-      );
+      community.push(newCode);
+      await kv.set("community_codes", community);
     }
     await kv.set(`suggestion:${id}`, { ...record, status: "approved" });
     await kv.zrem("suggestions:pending", id);
-    return NextResponse.json({
-      ok: true,
-      message: "승인 완료. Vercel 재배포가 시작됩니다.",
-    });
+    return NextResponse.json({ ok: true, message: "승인 완료." });
   } catch (e) {
     return NextResponse.json(
-      { error: e instanceof Error ? e.message : "GitHub 업데이트 실패" },
+      { error: e instanceof Error ? e.message : "저장 실패" },
       { status: 500 }
     );
   }

@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { MemberNumberInput } from "./MemberNumberInput";
 import { CodeRunner } from "./CodeRunner";
+import { CustomCodeRunner } from "./CustomCodeRunner";
 import { SuggestionForm } from "./SuggestionForm";
 import type { Code } from "@/lib/schemas";
 
@@ -12,18 +14,34 @@ interface Props {
 
 export function MainContent({ codes }: Props) {
   const [memberNo, setMemberNo] = useState("");
+  const [visitors, setVisitors] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch("/api/visitors", { method: "POST" })
+      .then((r) => r.json())
+      .then((d: { count: number }) => setVisitors(d.count))
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
-        <div>
-          <h1 className="text-2xl font-bold">몬길 쿠폰 자동 입력기</h1>
+      <div className="max-w-5xl mx-auto px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+          <h1 className="text-xl sm:text-2xl font-bold">몬길 쿠폰 자동 입력기</h1>
           <p className="text-muted-foreground mt-1 text-sm">
             회원번호를 입력하고 <strong>전체 시도</strong>를 누르면 모든 공개 쿠폰코드를 자동으로 등록합니다.
           </p>
+          </div>
+          <Link
+            href="/admin"
+            className="shrink-0 text-xs text-muted-foreground hover:text-foreground transition-colors mt-1"
+          >
+            관리자
+          </Link>
         </div>
 
-        <div className="max-w-md">
+        <div className="w-full max-w-md">
           <MemberNumberInput value={memberNo} onChange={setMemberNo} />
           <p className="text-xs text-muted-foreground mt-2">
             회원번호(PID)는{" "}
@@ -41,7 +59,11 @@ export function MainContent({ codes }: Props) {
 
         <CodeRunner codes={codes} memberNo={memberNo} />
 
-        <div className="max-w-md">
+        <div className="w-full max-w-md">
+          <CustomCodeRunner memberNo={memberNo} />
+        </div>
+
+        <div className="w-full max-w-md">
           <SuggestionForm />
         </div>
 
@@ -52,6 +74,11 @@ export function MainContent({ codes }: Props) {
           <p className="text-xs text-muted-foreground">
             쿠폰 코드는 공개된 정보를 기반으로 등록되며, 유효기간이 지난 코드는 사용이 불가할 수 있습니다.
           </p>
+          {visitors !== null && (
+            <p className="text-xs text-muted-foreground">
+              누적 방문자 {visitors.toLocaleString()}명
+            </p>
+          )}
         </footer>
       </div>
     </div>

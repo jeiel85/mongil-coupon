@@ -26,7 +26,7 @@ export async function verifyAdminToken(token: string): Promise<boolean> {
     const { payload } = await jwtVerify(token, secret);
     if (!payload.jti) return false;
     const valid = await kv.get(`admin:session:${payload.jti}`);
-    return valid === "1";
+    return valid !== null;
   } catch {
     return false;
   }

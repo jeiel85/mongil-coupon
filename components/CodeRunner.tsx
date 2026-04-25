@@ -22,8 +22,7 @@ function jitter(min: number, max: number) {
 }
 
 function cacheKey(memberNo: string) {
-  const date = new Date().toISOString().slice(0, 10);
-  return `mongil_results_${date}_${memberNo.slice(0, 8)}`;
+  return `mongil_results_${memberNo.slice(0, 8)}`;
 }
 
 function loadCache(memberNo: string): Record<string, RedeemResult> {
@@ -130,12 +129,9 @@ export function CodeRunner({ codes, memberNo }: Props) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>쿠폰 코드</TableHead>
+              <TableHead>코드</TableHead>
               <TableHead>보상</TableHead>
-              <TableHead>발행일</TableHead>
-              <TableHead>만료일</TableHead>
               <TableHead>상태</TableHead>
-              <TableHead>보상 이미지</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -144,7 +140,6 @@ export function CodeRunner({ codes, memberNo }: Props) {
                 key={code.code}
                 code={code}
                 status={states[code.code]?.status ?? "idle"}
-                result={states[code.code]?.result}
               />
             ))}
           </TableBody>
