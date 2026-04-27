@@ -35,7 +35,7 @@ export function MainContent({ codes }: Props) {
           </div>
           <div className="flex gap-4 text-sm mt-1">
             <a
-              href="https://forum.netmarble.com/monster"
+              href="https://forum.netmarble.com/stardive_ko"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors"
