@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -79,7 +80,13 @@ export default function AdminPage() {
 
   if (!loggedIn) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex flex-col items-center justify-center space-y-4">
+        <Link
+          href="/"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          ← 메인으로 돌아가기
+        </Link>
         <Card className="w-full max-w-sm">
           <CardHeader>
             <CardTitle>관리자 로그인</CardTitle>
@@ -112,7 +119,15 @@ export default function AdminPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">코드 제안 관리</h1>
+        <div className="space-y-1">
+          <Link
+            href="/"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+          >
+            ← 메인으로 돌아가기
+          </Link>
+          <h1 className="text-xl font-bold">코드 제안 관리</h1>
+        </div>
         <Button variant="outline" size="sm" onClick={loadSuggestions} disabled={loading}>
           새로고침
         </Button>
