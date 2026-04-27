@@ -86,26 +86,27 @@ export default function AdminPage() {
 
   if (!loggedIn) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center space-y-4">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-6 bg-muted/30 px-4">
         <Link
           href="/"
           className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           ← 메인으로 돌아가기
         </Link>
-        <Card className="w-full max-w-sm">
-          <CardHeader>
-            <CardTitle>관리자 로그인</CardTitle>
+        <Card className="w-full max-w-sm shadow-md">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">관리자 로그인</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <Label htmlFor="pw">비밀번호</Label>
                 <Input
                   id="pw"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  placeholder="비밀번호를 입력하세요"
                   required
                 />
               </div>
@@ -123,67 +124,120 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <Link
-            href="/"
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-          >
-            ← 메인으로 돌아가기
-          </Link>
-          <h1 className="text-xl font-bold">코드 제안 관리</h1>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={loadSuggestions} disabled={loading}>
-            새로고침
-          </Button>
-          <Button variant="ghost" size="sm" onClick={handleLogout}>
-            로그아웃
-          </Button>
+    <div className="min-h-screen bg-muted/30">
+      {/* 헤더 */}
+      <div className="border-b bg-background">
+        <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              ← 메인
+            </Link>
+            <span className="text-muted-foreground/40">|</span>
+            <h1 className="text-sm font-semibold">코드 제안 관리</h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadSuggestions}
+              disabled={loading}
+            >
+              새로고침
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              로그아웃
+            </Button>
+          </div>
         </div>
       </div>
 
-      {loading && <p className="text-muted-foreground text-sm">불러오는 중...</p>}
+      {/* 본문 */}
+      <div className="max-w-3xl mx-auto px-4 py-8 space-y-4">
+        {/* 제안 수 요약 */}
+        {!loading && (
+          <p className="text-sm text-muted-foreground">
+            {suggestions.length > 0
+              ? `대기 중인 제안 ${suggestions.length}건`
+              : "대기 중인 제안이 없습니다."}
+          </p>
+        )}
 
-      {!loading && suggestions.length === 0 && (
-        <p className="text-muted-foreground text-sm">대기 중인 제안이 없습니다.</p>
-      )}
+        {loading && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground py-12 justify-center">
+            <span className="animate-spin">⟳</span>
+            불러오는 중...
+          </div>
+        )}
 
-      <div className="space-y-3">
-        {suggestions.map((s) => (
-          <Card key={s.id}>
-            <CardContent className="pt-4 space-y-2">
-              <div className="flex items-center gap-3 flex-wrap">
-                <span className="font-mono font-semibold">{s.code}</span>
-                <Badge variant="outline">{s.voteCount}표</Badge>
-                <span className="text-xs text-muted-foreground">
-                  {new Date(s.createdAt).toLocaleDateString("ko-KR")}
-                </span>
-              </div>
-              {s.reward && (
-                <p className="text-sm text-muted-foreground">보상: {s.reward}</p>
-              )}
-              <div className="flex gap-2 pt-1 flex-wrap">
-                <Button size="sm" onClick={() => handleAction(s.id, "approve")}>
-                  승인
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleAction(s.id, "reject")}
-                >
-                  거부
-                </Button>
-                {actionMsg[s.id] && (
-                  <span className="text-sm text-muted-foreground self-center">
-                    {actionMsg[s.id]}
+        {/* 제안 카드 목록 */}
+        <div className="space-y-3">
+          {suggestions.map((s) => (
+            <Card key={s.id} className="shadow-sm">
+              <CardContent className="p-5">
+                {/* 상단: 코드명 + 뱃지 + 날짜 */}
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="font-mono font-bold text-base tracking-wide truncate">
+                      {s.code}
+                    </span>
+                    <Badge variant="secondary" className="shrink-0 text-xs">
+                      {s.voteCount}표
+                    </Badge>
+                  </div>
+                  <span className="text-xs text-muted-foreground shrink-0">
+                    {new Date(s.createdAt).toLocaleDateString("ko-KR")}
                   </span>
+                </div>
+
+                {/* 보상 정보 */}
+                {s.reward ? (
+                  <p className="text-sm text-muted-foreground mb-4">
+                    보상: {s.reward}
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground/50 mb-4">
+                    보상 정보 없음
+                  </p>
                 )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+
+                {/* 하단: 액션 버튼 */}
+                <div className="flex items-center gap-2 pt-1 border-t">
+                  {actionMsg[s.id] ? (
+                    <span className="text-sm text-muted-foreground py-1">
+                      {actionMsg[s.id]}
+                    </span>
+                  ) : (
+                    <>
+                      <Button
+                        size="sm"
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                        onClick={() => handleAction(s.id, "approve")}
+                      >
+                        승인
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
+                        onClick={() => handleAction(s.id, "reject")}
+                      >
+                        거부
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );
