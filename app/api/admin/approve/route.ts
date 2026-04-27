@@ -55,9 +55,9 @@ export async function POST(req: NextRequest) {
     await kv.set(`suggestion:${id}`, { ...record, status: "approved" });
     await kv.zrem("suggestions:pending", id);
     return NextResponse.json({ ok: true, message: "승인 완료." });
-  } catch (e) {
+  } catch {
     return NextResponse.json(
-      { error: e instanceof Error ? e.message : "저장 실패" },
+      { error: "저장 중 오류가 발생했습니다." },
       { status: 500 }
     );
   }

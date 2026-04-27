@@ -8,7 +8,7 @@
 
 <br/>
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/seongnae/mongil-coupon)&nbsp;&nbsp;
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/jeiel85/mongil-coupon)&nbsp;&nbsp;
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ![Next.js](https://img.shields.io/badge/Next.js_16-000000?style=flat&logo=nextdotjs&logoColor=white)
@@ -54,7 +54,7 @@ Deploy     Vercel (Fluid Compute)
 
 ```bash
 # 레포지토리 클론
-git clone https://github.com/seongnae/mongil-coupon.git
+git clone https://github.com/jeiel85/mongil-coupon.git
 cd mongil-coupon
 
 # 의존성 설치
@@ -177,6 +177,6 @@ mongil-coupon/
 
 Made with ❤️ for 몬길 유저들
 
-[라이브 데모](https://mongil-coupon.vercel.app) · [쿠폰 제보하기](https://mongil-coupon.vercel.app) · [버그 신고](https://github.com/seongnae/mongil-coupon/issues)
+[라이브 데모](https://mongil-coupon.vercel.app) · [쿠폰 제보하기](https://mongil-coupon.vercel.app) · [버그 신고](https://github.com/jeiel85/mongil-coupon/issues)
 
 </div>

@@ -57,6 +57,12 @@ export default function AdminPage() {
     }
   };
 
+  const handleLogout = async () => {
+    await fetch("/api/admin/logout", { method: "POST" });
+    setLoggedIn(false);
+    setSuggestions([]);
+  };
+
   const handleAction = async (id: string, action: "approve" | "reject") => {
     setActionMsg((prev) => ({ ...prev, [id]: "처리 중..." }));
     try {
@@ -128,9 +134,14 @@ export default function AdminPage() {
           </Link>
           <h1 className="text-xl font-bold">코드 제안 관리</h1>
         </div>
-        <Button variant="outline" size="sm" onClick={loadSuggestions} disabled={loading}>
-          새로고침
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={loadSuggestions} disabled={loading}>
+            새로고침
+          </Button>
+          <Button variant="ghost" size="sm" onClick={handleLogout}>
+            로그아웃
+          </Button>
+        </div>
       </div>
 
       {loading && <p className="text-muted-foreground text-sm">불러오는 중...</p>}

@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import staticCodes from "@/data/codes.json";
 import { kv } from "@/lib/kv";
+import { z } from "zod";
 import type { Code } from "@/lib/schemas";
 
 export const dynamic = "force-dynamic";
+
+const CodeInputSchema = z.object({
+  code: z.string().min(1).max(64),
+});
 
 export async function GET() {
   const community = (await kv.get<Code[]>("community_codes")) ?? [];
@@ -18,12 +23,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
   }
 
-  const { code } = body as { code?: string };
-  if (!code || typeof code !== "string") {
+  const parsed = CodeInputSchema.safeParse(body);
+  if (!parsed.success) {
     return NextResponse.json({ error: "코드가 필요합니다." }, { status: 400 });
   }
 
-  const upper = code.trim().toUpperCase();
+  const upper = parsed.data.code.trim().toUpperCase();
 
   const alreadyStatic = (staticCodes as Code[]).some(
     (c) => c.code.toUpperCase() === upper
