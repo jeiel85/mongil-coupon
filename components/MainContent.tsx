@@ -28,17 +28,27 @@ export function MainContent({ codes }: Props) {
       <div className="max-w-5xl mx-auto px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
         <div className="flex items-start justify-between gap-4">
           <div>
-          <h1 className="text-xl sm:text-2xl font-bold">몬길 쿠폰 자동 입력기</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            회원번호를 입력하고 <strong>전체 시도</strong>를 누르면 모든 공개 쿠폰코드를 자동으로 등록합니다.
-          </p>
+            <h1 className="text-xl sm:text-2xl font-bold">몬길 쿠폰 자동 입력기</h1>
+            <p className="text-muted-foreground mt-1 text-sm">
+              회원번호를 입력하고 <strong>전체 시도</strong>를 누르면 모든 공개 쿠폰코드를 자동으로 등록합니다.
+            </p>
           </div>
-          <Link
-            href="/admin"
-            className="shrink-0 text-xs text-muted-foreground hover:text-foreground transition-colors mt-1"
-          >
-            관리자
-          </Link>
+          <div className="flex gap-4 text-sm mt-1">
+            <a
+              href="https://forum.netmarble.com/monster"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              공식 포럼
+            </a>
+            <Link
+              href="/admin"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              관리자 페이지
+            </Link>
+          </div>
         </div>
 
         <div className="w-full max-w-md">

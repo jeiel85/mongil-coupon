@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -65,6 +65,24 @@ export function CodeRunner({ codes, memberNo }: Props) {
     );
   });
   const [running, setRunning] = useState(false);
+
+  // Load cache when memberNo changes
+  useEffect(() => {
+    const cache = loadCache(memberNo);
+    setStates(
+      Object.fromEntries(
+        codes.map((c) => [
+          c.code,
+          cache[c.code]
+            ? {
+                status: cache[c.code].status as RedeemStatus,
+                result: cache[c.code],
+              }
+            : { status: "idle" as RedeemStatus },
+        ])
+      )
+    );
+  }, [codes, memberNo]);
 
   const runAll = useCallback(async () => {
     if (!memberNo || running) return;
