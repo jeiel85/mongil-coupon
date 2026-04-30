@@ -147,17 +147,19 @@ export function CodeRunner({ codes, memberNo }: Props) {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-12">#</TableHead>
               <TableHead>코드</TableHead>
               <TableHead>보상</TableHead>
               <TableHead>상태</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {codes.map((code) => (
+            {codes.map((code, index) => (
               <CodeResultRow
                 key={code.code}
                 code={code}
                 status={states[code.code]?.status ?? "idle"}
+                index={index + 1}
               />
             ))}
           </TableBody>
