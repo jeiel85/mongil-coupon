@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { redeemCoupon } from "@/lib/netmarble";
-import { RedeemRequestSchema } from "@/lib/schemas";
+import { RedeemRequestSchema, type Code } from "@/lib/schemas";
 import { rateLimit } from "@/lib/ratelimit";
+import { kv } from "@/lib/kv";
+import staticCodes from "@/data/codes.json";
 
 export async function POST(req: NextRequest) {
   const ip =
@@ -32,5 +34,39 @@ export async function POST(req: NextRequest) {
 
   const { memberNo, code } = parsed.data;
   const result = await redeemCoupon(memberNo, code);
+  const upperCode = code.toUpperCase();
+
+  // 후처리: 보상 정보 업데이트 또는 만료된 코드 삭제
+  if (result.status === "success" && result.reward) {
+    // 1. 커뮤니티 코드 업데이트
+    const community = (await kv.get<Code[]>("community_codes")) ?? [];
+    const index = community.findIndex(
+      (c) => c.code.toUpperCase() === upperCode
+    );
+    if (index !== -1 && community[index].reward === "미확인") {
+      community[index].reward = result.reward;
+      await kv.set("community_codes", community);
+    }
+
+    // 2. 정적 코드 보상 오버라이드 (미확인인 경우만)
+    const isStatic = (staticCodes as Code[]).some(
+      (c) => c.code.toUpperCase() === upperCode && c.reward === "미확인"
+    );
+    if (isStatic) {
+      await kv.hset("reward_overrides", { [upperCode]: result.reward });
+    }
+  } else if (result.status === "expired") {
+    // 만료된 코드는 블랙리스트에 추가하여 목록에서 제외되도록 함
+    await kv.sadd("expired_codes", upperCode);
+
+    const community = (await kv.get<Code[]>("community_codes")) ?? [];
+    const newCommunity = community.filter(
+      (c) => c.code.toUpperCase() !== upperCode
+    );
+    if (community.length !== newCommunity.length) {
+      await kv.set("community_codes", newCommunity);
+    }
+  }
+
   return NextResponse.json(result);
 }

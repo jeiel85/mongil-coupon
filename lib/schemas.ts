@@ -41,6 +41,7 @@ export const RedeemResultSchema = z.object({
   ]),
   message: z.string(),
   images: z.array(z.string()).optional(),
+  reward: z.string().optional(),
 });
 
 export type RedeemResult = z.infer<typeof RedeemResultSchema>;

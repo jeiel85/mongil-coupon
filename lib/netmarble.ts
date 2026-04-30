@@ -60,7 +60,10 @@ export async function redeemCoupon(
     const images = data.resultData.flatMap((slot) =>
       slot.products.map((p) => p.productImageUrl)
     );
-    return { code, status: "success", message: "등록 완료!", images };
+    const reward = data.resultData
+      .flatMap((slot) => slot.products.map((p) => p.productName))
+      .join(", ");
+    return { code, status: "success", message: "등록 완료!", images, reward };
   }
 
   const err = data as NetmarbleErrorResponse;
