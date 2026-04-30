@@ -56,20 +56,33 @@ export async function redeemCoupon(
     return { code, status: "error", message: "네트워크 오류가 발생했습니다." };
   }
 
-  if ("success" in data && data.success) {
-    const images = data.resultData.flatMap((slot) =>
+  // 결과 데이터가 있으면 성공 여부와 상관없이 추출 시도
+  let images: string[] | undefined;
+  let reward: string | undefined;
+
+  if ("resultData" in data && data.resultData && Array.isArray(data.resultData)) {
+    images = data.resultData.flatMap((slot) =>
       slot.products.map((p) => p.productImageUrl)
     );
-    const reward = data.resultData
+    reward = data.resultData
       .flatMap((slot) => slot.products.map((p) => p.productName))
       .join(", ");
+  }
+
+  if ("success" in data && data.success) {
     return { code, status: "success", message: "등록 완료!", images, reward };
   }
 
   const err = data as NetmarbleErrorResponse;
   switch (err.errorCode) {
     case 24004:
-      return { code, status: "already_redeemed", message: "이미 등록된 코드입니다." };
+      return {
+        code,
+        status: "already_redeemed",
+        message: "이미 등록된 코드입니다.",
+        images,
+        reward,
+      };
     case 24002:
       return { code, status: "invalid_code", message: "잘못된 쿠폰 코드입니다." };
     case 24003:
@@ -79,6 +92,8 @@ export async function redeemCoupon(
         code,
         status: "error",
         message: err.errorMessage ?? "알 수 없는 오류가 발생했습니다.",
+        images,
+        reward,
       };
   }
 }

@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
   const upperCode = code.toUpperCase();
 
   // 후처리: 보상 정보 업데이트 또는 만료된 코드 삭제
-  if (result.status === "success" && result.reward) {
+  if (result.reward) {
     // 1. 커뮤니티 코드 업데이트
     const community = (await kv.get<Code[]>("community_codes")) ?? [];
     const index = community.findIndex(
@@ -55,7 +55,9 @@ export async function POST(req: NextRequest) {
     if (isStatic) {
       await kv.hset("reward_overrides", { [upperCode]: result.reward });
     }
-  } else if (result.status === "expired") {
+  }
+
+  if (result.status === "expired") {
     // 만료된 코드는 블랙리스트에 추가하여 목록에서 제외되도록 함
     await kv.sadd("expired_codes", upperCode);
 
