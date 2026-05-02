@@ -1,5 +1,14 @@
 [
   {
+    "code": "SPECIALGIFT0430",
+    "reward": "특별 선물",
+    "addedAt": "2026-04-30",
+    "issuedAt": null,
+    "expiresAt": null,
+    "status": "active",
+    "source": "official"
+  },
+  {
     "code": "LOVEMONGIL",
     "reward": "아티팩트: 넘쳐흐르는 사랑",
     "addedAt": "2026-04-24",

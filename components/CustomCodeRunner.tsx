@@ -32,7 +32,7 @@ export function CustomCodeRunner({ memberNo }: Props) {
   const [running, setRunning] = useState(false);
 
   const handleRun = async () => {
-    const trimmed = code.trim().toUpperCase();
+    const trimmed = code.trim();
     if (!memberNo || !trimmed || running) return;
     setRunning(true);
     setStatus("pending");
@@ -82,7 +82,7 @@ export function CustomCodeRunner({ memberNo }: Props) {
           className="font-mono max-w-64"
           placeholder="리딤 코드"
           value={code}
-          onChange={(e) => setCode(e.target.value.toUpperCase())}
+          onChange={(e) => setCode(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleRun()}
           disabled={running}
         />

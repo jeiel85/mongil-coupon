@@ -57,9 +57,9 @@ export async function redeemCoupon(
   }
 
   if ("success" in data && data.success) {
-    const images = data.resultData.flatMap((slot) =>
+    const images = data.resultData?.flatMap((slot) =>
       slot.products.map((p) => p.productImageUrl)
-    );
+    ) ?? [];
     return { code, status: "success", message: "등록 완료!", images };
   }
 
@@ -72,10 +72,11 @@ export async function redeemCoupon(
     case 24003:
       return { code, status: "expired", message: "만료된 쿠폰 코드입니다." };
     default:
+      const msg = err.errorMessage || err.errorCause || "알 수 없는 오류가 발생했습니다.";
       return {
         code,
         status: "error",
-        message: err.errorMessage ?? "알 수 없는 오류가 발생했습니다.",
+        message: `${msg} (코드: ${err.errorCode ?? "unknown"})`,
       };
   }
 }
