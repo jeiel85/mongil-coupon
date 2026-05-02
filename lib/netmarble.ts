@@ -76,10 +76,12 @@ export async function redeemCoupon(
   const err = data as NetmarbleErrorResponse;
   switch (err.errorCode) {
     case 24004:
+      // 서버에서 제공하는 실제 에러 메시지를 우선 사용 (예: 교환 횟수 초과 등)
+      const serverMsg = err.errorMessage ?? "이미 등록된 코드입니다.";
       return {
         code,
         status: "already_redeemed",
-        message: "이미 등록된 코드입니다.",
+        message: serverMsg,
         images,
         reward,
       };

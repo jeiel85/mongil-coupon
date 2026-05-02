@@ -17,7 +17,16 @@ export async function GET() {
     kv.hgetall<Record<string, string>>("reward_overrides"),
   ]);
 
-  const communityCodes = (community ?? []).filter(
+  // Deduplicate community codes by code (case-insensitive) to avoid duplicates in UI
+  const rawCommunity = (community ?? []);
+  const uniqueCommunity = Array.from(
+    new Map(rawCommunity.map((cc) => [cc.code.toUpperCase(), cc])).values()
+  );
+  // Persist deduplicated list back to storage if duplicates were present
+  if (rawCommunity.length !== uniqueCommunity.length) {
+    await kv.set("community_codes", uniqueCommunity as Code[]);
+  }
+  const communityCodes = uniqueCommunity.filter(
     (cc) =>
       !(staticCodes as Code[]).some(
         (sc) => sc.code.toUpperCase() === cc.code.toUpperCase()
