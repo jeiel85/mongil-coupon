@@ -159,6 +159,7 @@ export function CodeRunner({ codes, memberNo }: Props) {
                 key={code.code}
                 code={code}
                 status={states[code.code]?.status ?? "idle"}
+                result={states[code.code]?.result}
                 index={index + 1}
               />
             ))}

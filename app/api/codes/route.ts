@@ -17,7 +17,12 @@ export async function GET() {
     kv.hgetall<Record<string, string>>("reward_overrides"),
   ]);
 
-  const communityCodes = community ?? [];
+  const communityCodes = (community ?? []).filter(
+    (cc) =>
+      !(staticCodes as Code[]).some(
+        (sc) => sc.code.toUpperCase() === cc.code.toUpperCase()
+      )
+  );
   const expiredSet = new Set((expired ?? []).map((c) => c.toUpperCase()));
   const rewardOverrides = overrides ?? {};
 
