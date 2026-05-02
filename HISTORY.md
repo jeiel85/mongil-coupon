@@ -5,10 +5,28 @@
   - 기존: 고정 메시지 "이미 등록된 코드입니다." 반환
   - 변경: err.errorMessage 우선 노출, 없을 때만 기본 메시지 사용
   - 파일: lib/netmarble.ts
+- **24002, 24003 에러 메시지도 서버 메시지 노출하도록 정리**
+  - 24002(잘못된 코드), 24003(만료된 코드)도 서버의 errorMessage를 우선 사용하도록 수정
+  - 파일: lib/netmarble.ts
 - **커뮤니티 코드 중복 제거 로직 추가**
   - GET /codes 응답 시 대소문자 무시 중복 제거 후 저장(community_codes)
   - 중복이 발견되면 KV에 정리된 리스트를 자동 저장하여 리스트 중복 표시 방지
   - 파일: app/api/codes/route.ts
+- **Code 모델에 gameCode 필드 추가**
+  - CodeSchema에 gameCode?: string (기본값 "monster2") 추가
+  - 모든 쿠폰 코드가 게임별로 매핑될 수 있도록 확장
+  - 파일: lib/schemas.ts, data/codes.json
+- **per-code gameCode 지원 및 기본값 monster2 적용**
+  - redeemCoupon 함수가 code별 gameCode를 받도록 수정
+  - staticCodes 및 community_codes에서 해당 코드의 gameCode를 조회하여 사용
+  - 기본값은 "monster2"로 유지
+  - 파일: lib/netmarble.ts, app/api/redeem/route.ts
+- **신규 리딤코드 감지 및 관리자 알림 기능 추가**
+  - 등록되지 않은 새로운 코드 사용 시 KV에 알림 저장 및 관리자에게 알림 전송
+  - 24시간 중복 알림 방지 로직 포함
+  - 파일: app/api/redeem/route.ts
+- **SPECIALGIFT0430 중복 문제 해결**
+  - 커뮤니티 코드 중복 제거 로직으로 자동 정리되도록 개선
 - **배포 및 푸시**
   - 리모트 저장소(origin master)에 변경 사항 푸시 및 배포 진행
 

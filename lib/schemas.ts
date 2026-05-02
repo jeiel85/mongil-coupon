@@ -8,6 +8,7 @@ export const CodeSchema = z.object({
   expiresAt: z.string().nullable(),
   status: z.enum(["active", "expired", "unknown"]),
   source: z.enum(["official", "community"]),
+  gameCode: z.string().optional().default("monster2"),
 });
 
 export type Code = z.infer<typeof CodeSchema>;

@@ -31,10 +31,11 @@ type NetmarbleResponse = NetmarbleSuccessResponse | NetmarbleErrorResponse;
 
 export async function redeemCoupon(
   memberNo: string,
-  code: string
+  code: string,
+  gameCode: string = "monster2"
 ): Promise<RedeemResult> {
   const url = new URL(NETMARBLE_COUPON_URL);
-  url.searchParams.set("gameCode", "monster2");
+  url.searchParams.set("gameCode", gameCode);
   url.searchParams.set("couponCode", code);
   url.searchParams.set("langCd", "KO_KR");
   url.searchParams.set("pid", memberNo);
@@ -86,9 +87,17 @@ export async function redeemCoupon(
         reward,
       };
     case 24002:
-      return { code, status: "invalid_code", message: "잘못된 쿠폰 코드입니다." };
+      return {
+        code,
+        status: "invalid_code",
+        message: err.errorMessage ?? "잘못된 쿠폰 코드입니다.",
+      };
     case 24003:
-      return { code, status: "expired", message: "만료된 쿠폰 코드입니다." };
+      return {
+        code,
+        status: "expired",
+        message: err.errorMessage ?? "만료된 쿠폰 코드입니다.",
+      };
     default:
       const msg = err.errorMessage || err.errorCause || "알 수 없는 오류가 발생했습니다.";
       return {

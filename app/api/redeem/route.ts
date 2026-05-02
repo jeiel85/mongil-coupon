@@ -3,6 +3,7 @@ import { redeemCoupon } from "@/lib/netmarble";
 import { RedeemRequestSchema, type Code } from "@/lib/schemas";
 import { rateLimit } from "@/lib/ratelimit";
 import { kv } from "@/lib/kv";
+import { sendNotification } from "@/lib/notify";
 import staticCodes from "@/data/codes.json";
 
 export async function POST(req: NextRequest) {
@@ -33,8 +34,45 @@ export async function POST(req: NextRequest) {
   }
 
   const { memberNo, code } = parsed.data;
-  const result = await redeemCoupon(memberNo, code);
   const upperCode = code.toUpperCase();
+
+  // 코드의 gameCode 확인 (staticCodes 우선, 없으면 커뮤니티에서 확인)
+  const staticCode = (staticCodes as Code[]).find(
+    (c) => c.code.toUpperCase() === upperCode
+  );
+  let gameCode = staticCode?.gameCode ?? "monster2";
+
+  if (!staticCode) {
+    const community = (await kv.get<Code[]>("community_codes")) ?? [];
+    const communityCode = community.find(
+      (c) => c.code.toUpperCase() === upperCode
+    );
+    if (communityCode?.gameCode) {
+      gameCode = communityCode.gameCode;
+    }
+  }
+
+  const result = await redeemCoupon(memberNo, code, gameCode);
+
+  // 신규 리딤코드 감지: staticCodes나 community_codes에 없으면 관리자 알림
+  const isKnownStatic = (staticCodes as Code[]).some(
+    (c) => c.code.toUpperCase() === upperCode
+  );
+  const communityNow = (await kv.get<Code[]>("community_codes")) ?? [];
+  const isKnownCommunity = communityNow.some(
+    (c) => c.code.toUpperCase() === upperCode
+  );
+  if (!isKnownStatic && !isKnownCommunity) {
+    const exists = await kv.exists(`new_code_alert:${upperCode}`);
+    if (!exists) {
+      await sendNotification(
+        "신규 리딤코드 감지",
+        `등록되지 않은 새로운 코드 "${code}"가 사용되었습니다. 관리자 확인이 필요합니다.`
+      );
+      // 24시간 동안 중복 알림 방지
+      await kv.set(`new_code_alert:${upperCode}`, "1", { ex: 86400 });
+    }
+  }
 
   // 후처리: 보상 정보 업데이트 또는 만료된 코드 삭제
   if (result.reward) {
