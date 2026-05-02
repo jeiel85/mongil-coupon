@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { kv } from "@/lib/kv";
 import { rateLimit, hashIp } from "@/lib/ratelimit";
 import { sendNotification } from "@/lib/notify";
-import { SuggestionSchema, type SuggestionRecord } from "@/lib/schemas";
+import { SuggestionSchema, type SuggestionRecord, type Code } from "@/lib/schemas";
+import { verifyAdminToken, AUTH_COOKIE } from "@/lib/auth";
+import staticCodes from "@/data/codes.json";
 
 const THRESHOLD = parseInt(process.env.SUGGESTION_THRESHOLD ?? "3", 10);
 
@@ -12,7 +14,11 @@ function sanitize(str: string): string {
   );
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const token = req.cookies.get(AUTH_COOKIE)?.value ?? "";
+  if (!(await verifyAdminToken(token))) {
+    return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 });
+  }
   const ids = await kv.zrange<string[]>("suggestions:pending", 0, -1, { rev: true });
   if (!ids || ids.length === 0) return NextResponse.json([]);
   const records = await Promise.all(
@@ -49,9 +55,34 @@ export async function POST(req: NextRequest) {
   }
 
   const { code, reward } = parsed.data;
-  const cleanCode = sanitize(code);
+  const upperCode = code.toUpperCase();
+  const cleanCode = sanitize(upperCode);
   const cleanReward = sanitize(reward ?? "");
   const ipHash = hashIp(ip);
+
+  // 이미 등록된 코드인지 확인
+  const isStatic = (staticCodes as Code[]).some(
+    (c) => c.code.toUpperCase() === upperCode
+  );
+  const [community, isExpired] = await Promise.all([
+    kv.get<Code[]>("community_codes"),
+    kv.sismember("expired_codes", upperCode),
+  ]);
+  const isCommunity = (community ?? []).some((c) => c.code.toUpperCase() === upperCode);
+
+  if (isExpired) {
+    return NextResponse.json(
+      { error: "이미 만료된 것으로 확인된 코드입니다." },
+      { status: 400 }
+    );
+  }
+
+  if (isStatic || isCommunity) {
+    return NextResponse.json(
+      { error: "이미 등록되어 있는 코드입니다." },
+      { status: 400 }
+    );
+  }
 
   // 이미 제안된 동일 코드가 있으면 투표 처리
   const existingIds = await kv.zrange<string[]>("suggestions:pending", 0, -1);

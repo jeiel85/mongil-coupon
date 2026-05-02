@@ -7,6 +7,7 @@ import type { Code, RedeemStatus } from "@/lib/schemas";
 interface Props {
   code: Code;
   status: RedeemStatus;
+  index: number;
 }
 
 const STATUS_CONFIG: Record<
@@ -22,13 +23,14 @@ const STATUS_CONFIG: Record<
   error: { label: "오류", variant: "destructive" },
 };
 
-export function CodeResultRow({ code, status }: Props) {
+export function CodeResultRow({ code, status, index }: Props) {
   const cfg = STATUS_CONFIG[status];
   const isExpiredByDate =
     code.expiresAt && new Date(code.expiresAt) < new Date();
 
   return (
     <TableRow className={isExpiredByDate ? "opacity-50" : ""}>
+      <TableCell className="text-xs text-muted-foreground font-mono">{index}</TableCell>
       <TableCell className="font-mono font-semibold text-sm">{code.code}</TableCell>
       <TableCell className="text-sm text-muted-foreground">{code.reward}</TableCell>
       <TableCell>
