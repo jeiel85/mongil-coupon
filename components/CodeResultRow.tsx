@@ -35,7 +35,7 @@ export function CodeResultRow({ code, status, result, index }: Props) {
       <TableCell className="font-mono font-semibold text-sm">
         {code.code}
         {status === "error" && result?.message && (
-          <p className="text-[10px] text-destructive font-sans mt-0.5 line-clamp-1">
+          <p className="text-[11px] text-destructive font-sans mt-0.5 leading-tight">
             {result.message}
           </p>
         )}

@@ -70,5 +70,11 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  return NextResponse.json(result);
+  return NextResponse.json(result, {
+    headers: {
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      Pragma: "no-cache",
+      Expires: "0",
+    },
+  });
 }
