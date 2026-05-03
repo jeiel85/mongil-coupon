@@ -3,6 +3,7 @@ import staticCodes from "@/data/codes.json";
 import { kv } from "@/lib/kv";
 import { z } from "zod";
 import type { Code } from "@/lib/schemas";
+import { getVisibleCodes } from "@/lib/codes";
 
 export const dynamic = "force-dynamic";
 
@@ -11,39 +12,7 @@ const CodeInputSchema = z.object({
 });
 
 export async function GET() {
-  const [community, expired, overrides] = await Promise.all([
-    kv.get<Code[]>("community_codes"),
-    kv.smembers("expired_codes"),
-    kv.hgetall<Record<string, string>>("reward_overrides"),
-  ]);
-
-  // Deduplicate community codes by code (case-insensitive) to avoid duplicates in UI
-  const rawCommunity = (community ?? []);
-  const uniqueCommunity = Array.from(
-    new Map(rawCommunity.map((cc) => [cc.code.toUpperCase(), cc])).values()
-  );
-  // Persist deduplicated list back to storage if duplicates were present
-  if (rawCommunity.length !== uniqueCommunity.length) {
-    await kv.set("community_codes", uniqueCommunity as Code[]);
-  }
-  const communityCodes = uniqueCommunity.filter(
-    (cc) =>
-      !(staticCodes as Code[]).some(
-        (sc) => sc.code.toUpperCase() === cc.code.toUpperCase()
-      )
-  );
-  const expiredSet = new Set((expired ?? []).map((c) => c.toUpperCase()));
-  const rewardOverrides = overrides ?? {};
-
-  const allCodes = [...(staticCodes as Code[]), ...communityCodes]
-    .filter((c) => !expiredSet.has(c.code.toUpperCase()))
-    .map((c) => {
-      const upper = c.code.toUpperCase();
-      if (rewardOverrides[upper] && c.reward === "미확인") {
-        return { ...c, reward: rewardOverrides[upper] };
-      }
-      return c;
-    });
+  const allCodes = await getVisibleCodes();
 
   return NextResponse.json(allCodes, {
     headers: {
@@ -92,6 +61,7 @@ export async function POST(req: NextRequest) {
     expiresAt: null,
     status: "active",
     source: "community",
+    gameCode: "monster2",
   };
   community.push(newCode);
   await kv.set("community_codes", community);

@@ -48,6 +48,7 @@ export async function POST(req: NextRequest) {
         expiresAt: null,
         status: "active",
         source: "community",
+        gameCode: "monster2",
       };
       community.push(newCode);
       await kv.set("community_codes", community);

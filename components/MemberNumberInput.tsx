@@ -15,11 +15,13 @@ export function MemberNumberInput({ value, onChange }: Props) {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) onChange(saved);
-    } catch {}
-    setLoaded(true);
+    queueMicrotask(() => {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) onChange(saved);
+      } catch {}
+      setLoaded(true);
+    });
   }, [onChange]);
 
   const handleChange = (v: string) => {

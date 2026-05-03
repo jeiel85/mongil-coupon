@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { SuggestionRecord } from "@/lib/schemas";
+import type { Code, SuggestionRecord } from "@/lib/schemas";
 
 export default function AdminPage() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -16,8 +17,11 @@ export default function AdminPage() {
   const [loginLoading, setLoginLoading] = useState(false);
 
   const [suggestions, setSuggestions] = useState<SuggestionRecord[]>([]);
+  const [codes, setCodes] = useState<Code[]>([]);
   const [loading, setLoading] = useState(false);
+  const [codesLoading, setCodesLoading] = useState(false);
   const [actionMsg, setActionMsg] = useState<Record<string, string>>({});
+  const [codeActionMsg, setCodeActionMsg] = useState<Record<string, string>>({});
 
   const loadSuggestions = useCallback(async () => {
     setLoading(true);
@@ -29,9 +33,15 @@ export default function AdminPage() {
     }
   }, []);
 
-  useEffect(() => {
-    if (loggedIn) loadSuggestions();
-  }, [loggedIn, loadSuggestions]);
+  const loadCodes = useCallback(async () => {
+    setCodesLoading(true);
+    try {
+      const res = await fetch("/api/admin/codes");
+      if (res.ok) setCodes(await res.json());
+    } finally {
+      setCodesLoading(false);
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +56,8 @@ export default function AdminPage() {
       if (res.ok) {
         setLoggedIn(true);
         setPassword("");
+        void loadSuggestions();
+        void loadCodes();
       } else {
         const data = (await res.json()) as { error?: string };
         setLoginError(data.error ?? "로그인 실패");
@@ -61,6 +73,7 @@ export default function AdminPage() {
     await fetch("/api/admin/logout", { method: "POST" });
     setLoggedIn(false);
     setSuggestions([]);
+    setCodes([]);
   };
 
   const handleAction = async (id: string, action: "approve" | "reject") => {
@@ -81,6 +94,36 @@ export default function AdminPage() {
       }
     } catch {
       setActionMsg((prev) => ({ ...prev, [id]: "오류 발생" }));
+    }
+  };
+
+  const handleDeleteCode = async (code: Code) => {
+    const confirmed = window.confirm(
+      code.source === "official"
+        ? `${code.code} 공식 코드를 목록에서 숨길까요?`
+        : `${code.code} 코드를 삭제할까요?`
+    );
+    if (!confirmed) return;
+
+    setCodeActionMsg((prev) => ({ ...prev, [code.code]: "처리 중..." }));
+    try {
+      const res = await fetch("/api/admin/codes", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: code.code }),
+      });
+      const data = (await res.json()) as { message?: string; error?: string };
+      setCodeActionMsg((prev) => ({
+        ...prev,
+        [code.code]: data.message ?? data.error ?? "완료",
+      }));
+      if (res.ok) {
+        setCodes((prev) =>
+          prev.filter((item) => item.code.toUpperCase() !== code.code.toUpperCase())
+        );
+      }
+    } catch {
+      setCodeActionMsg((prev) => ({ ...prev, [code.code]: "오류 발생" }));
     }
   };
 
@@ -142,8 +185,11 @@ export default function AdminPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={loadSuggestions}
-              disabled={loading}
+              onClick={() => {
+                loadSuggestions();
+                loadCodes();
+              }}
+              disabled={loading || codesLoading}
             >
               새로고침
             </Button>
@@ -160,7 +206,60 @@ export default function AdminPage() {
       </div>
 
       {/* 본문 */}
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-4">
+      <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+        <section className="space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold">등록 코드</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {codesLoading
+                  ? "불러오는 중..."
+                  : `현재 노출 중인 코드 ${codes.length}건`}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {codes.map((code) => (
+              <Card key={code.code} className="shadow-sm">
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="font-mono font-bold text-base tracking-wide truncate">
+                          {code.code}
+                        </span>
+                        <Badge variant="secondary" className="shrink-0 text-xs">
+                          {code.source === "official" ? "공식" : "커뮤니티"}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {code.reward || "보상 정보 없음"}
+                      </p>
+                      {codeActionMsg[code.code] && (
+                        <p className="text-sm text-muted-foreground mt-2">
+                          {codeActionMsg[code.code]}
+                        </p>
+                      )}
+                    </div>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30 shrink-0"
+                      onClick={() => handleDeleteCode(code)}
+                      title={code.source === "official" ? "숨김" : "삭제"}
+                      aria-label={code.source === "official" ? "숨김" : "삭제"}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        <section className="space-y-4">
         {/* 제안 수 요약 */}
         {!loading && (
           <p className="text-sm text-muted-foreground">
@@ -236,8 +335,9 @@ export default function AdminPage() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+            ))}
         </div>
+        </section>
       </div>
     </div>
   );

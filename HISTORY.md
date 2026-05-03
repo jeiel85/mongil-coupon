@@ -1,3 +1,23 @@
+## 2026-05-03 (일)
+### 변경 사항
+- **쿠폰 코드 중복 노출 원인 수정**
+  - 메인 페이지가 정적 코드와 커뮤니티 코드를 직접 합치면서 `/api/codes`의 중복 제거 로직을 우회하던 문제 수정
+  - 공통 `getVisibleCodes` 헬퍼를 추가하여 메인 페이지와 API가 동일한 코드 목록 정리 로직을 사용하도록 변경
+  - 커뮤니티 코드가 공식 코드와 중복되거나 커뮤니티 내부에서 중복될 경우 KV의 `community_codes`를 정리된 목록으로 자동 저장
+  - 파일: app/page.tsx, app/api/codes/route.ts, lib/codes.ts
+- **관리자 등록 코드 삭제 기능 추가**
+  - 관리자 페이지에서 현재 노출 중인 등록 코드 목록을 확인할 수 있도록 추가
+  - 커뮤니티 코드는 삭제, 공식 코드는 `expired_codes`에 추가하여 숨김 처리할 수 있는 관리자 API 추가
+  - 파일: app/admin/page.tsx, app/api/admin/codes/route.ts
+- **코드 생성 타입 오류 및 린트 오류 정리**
+  - 새 커뮤니티 코드 생성 시 기본 `gameCode: "monster2"`를 저장하도록 보완
+  - React lint 규칙에 맞게 기존 동기 effect state 업데이트를 비동기 큐 처리로 수정
+  - 파일: app/api/admin/approve/route.ts, app/api/codes/route.ts, components/CodeRunner.tsx, components/MemberNumberInput.tsx
+- **검증**
+  - `npm run lint` 통과
+  - `npm run build` 통과
+  - 로컬 `.env.local`의 KV URL/토큰 값이 비어 있어 직접 KV 정리는 수행하지 못함. 배포 환경에서는 코드 목록 조회 시 자동 정리됨
+
 ## 2026-05-02 (토)
 ### 변경 사항
 - **24004 에러 매핑 수정**
